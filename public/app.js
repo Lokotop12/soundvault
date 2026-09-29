@@ -220,6 +220,7 @@
 
       row.addEventListener('click', (e) => {
         if (e.target.closest('.track-like')) return;
+        if (e.target.closest('.track-art')) { openArtModal(track); return; }
         playQueue(tracks, idx);
       });
 
@@ -439,6 +440,43 @@
   }
   window.addEventListener('resize', drawWaveform);
 
+  // ---------- artwork modal ----------
+  function fmtCount(n) {
+    if (n == null) return '—';
+    if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (n >= 1e3) return (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
+    return String(n);
+  }
+
+  function openArtModal(track) {
+    if (!track) return;
+    const art = artworkUrl(track, 't500x500');
+    $('#modal-art').src = art || artworkUrl(track, 't300x300');
+    $('#modal-title').textContent = track.title || '—';
+    $('#modal-artist').textContent = (track.user && track.user.username) || '';
+    const stats = [];
+    if (track.duration) stats.push(`Длительность <b>${fmtTime(track.duration, true)}</b>`);
+    if (track.playback_count != null) stats.push(`Прослушивания <b>${fmtCount(track.playback_count)}</b>`);
+    if (track.likes_count != null) stats.push(`Лайки <b>${fmtCount(track.likes_count)}</b>`);
+    if (track.genre) stats.push(`Жанр <b>${track.genre}</b>`);
+    if (track.created_at) stats.push(`Дата <b>${new Date(track.created_at).toLocaleDateString('ru-RU')}</b>`);
+    $('#modal-stats').innerHTML = stats.join('<span>·</span>');
+    const desc = (track.description || '').trim();
+    $('#modal-desc').textContent = desc;
+    $('#modal-desc').classList.toggle('hidden', !desc);
+    $('#art-modal').classList.add('open');
+  }
+
+  function closeArtModal() {
+    $('#art-modal').classList.remove('open');
+  }
+
+  $('#player-artwork').addEventListener('click', () => openArtModal(state.currentTrack));
+  $('#modal-close').addEventListener('click', closeArtModal);
+  $('#art-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'art-modal') closeArtModal();
+  });
+
   // ---------- keyboard ----------
   document.addEventListener('keydown', (e) => {
     if (e.target.tagName === 'INPUT') return;
@@ -451,6 +489,7 @@
       case 'ArrowRight': audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 5); break;
       case 'KeyN': next(); break;
       case 'KeyP': prev(); break;
+      case 'Escape': closeArtModal(); break;
     }
   });
 

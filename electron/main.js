@@ -2,7 +2,7 @@
 // Поднимает локальный сервер (обход блокировок + проксирование аудио)
 // и показывает его в обычном окне приложения.
 const path = require('path');
-const { app, BrowserWindow, shell } = require('electron');
+const { app, BrowserWindow, shell, screen } = require('electron');
 
 // Нет root для setuid-sandbox — локальному приложению он не нужен.
 app.commandLine.appendSwitch('no-sandbox');
@@ -22,15 +22,21 @@ function waitForServer(tries = 40) {
 }
 
 function createWindow() {
+  // Окно под размер экрана: всё содержимое помещается без прокрутки панелей.
+  const area = screen.getPrimaryDisplay().workAreaSize;
+  const width = Math.min(1360, Math.round(area.width * 0.88));
+  const height = Math.min(880, Math.round(area.height * 0.9));
+
   const win = new BrowserWindow({
-    width: 1180,
-    height: 780,
-    minWidth: 760,
-    minHeight: 480,
+    width,
+    height,
+    minWidth: 820,
+    minHeight: 520,
+    center: true,
     title: 'SoundVault',
     icon: path.join(__dirname, '..', 'public', 'icon-512.png'),
     autoHideMenuBar: true,
-    backgroundColor: '#0e0e12',
+    backgroundColor: '#0b0b10',
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
@@ -52,6 +58,7 @@ function createWindow() {
 }
 
 app.whenReady().then(async () => {
+  app.setAppUserModelId('com.lokotop12.soundvault');
   // Если сервер уже запущен (например, через npm run serve) — просто подключаемся.
   const alreadyUp = await fetch(`${BASE}/api/status`).then(() => true).catch(() => false);
   if (!alreadyUp) {

@@ -1,5 +1,5 @@
 // SoundVault service worker: cache static assets, always network for API/media.
-const CACHE = 'soundvault-v2';
+const CACHE = 'soundvault-v3';
 const STATIC = ['/', '/index.html', '/style.css', '/app.js', '/vendor/hls.js', '/manifest.webmanifest'];
 
 self.addEventListener('install', (e) => {

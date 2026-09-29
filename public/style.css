@@ -20,6 +20,44 @@ body {
   overflow: hidden;
 }
 
+/* ---- Живой фон-аврора ---- */
+body::before {
+  content: '';
+  position: fixed;
+  inset: -20%;
+  z-index: -2;
+  background:
+    radial-gradient(ellipse 45% 40% at 15% 20%, rgba(255, 85, 0, 0.22), transparent 60%),
+    radial-gradient(ellipse 40% 45% at 85% 15%, rgba(122, 60, 255, 0.18), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 85%, rgba(0, 140, 255, 0.14), transparent 60%),
+    radial-gradient(ellipse 40% 35% at 20% 85%, rgba(255, 40, 120, 0.12), transparent 60%),
+    var(--bg);
+  animation: aurora 26s ease-in-out infinite alternate;
+}
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 26px 26px;
+  pointer-events: none;
+}
+@keyframes aurora {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(3%, -2%) scale(1.06); }
+  100% { transform: translate(-3%, 2%) scale(1.03); }
+}
+
+/* ---- Стекло ---- */
+.glass, #sidebar, #player, .login-card, .playlist-card, #art-modal .modal-card {
+  background: rgba(22, 22, 29, 0.55) !important;
+  backdrop-filter: blur(22px) saturate(1.3);
+  -webkit-backdrop-filter: blur(22px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
 .hidden { display: none !important; }
 .error { color: #ff5555; font-size: 14px; margin-top: 10px; }
 .note { color: var(--text-dim); font-size: 13px; margin-top: 14px; }
@@ -193,8 +231,8 @@ button {
   cursor: pointer;
   transition: background 0.12s;
 }
-.track-row:hover { background: var(--bg-2); }
-.track-row.playing { background: var(--bg-3); }
+.track-row:hover { background: rgba(255, 255, 255, 0.05); }
+.track-row.playing { background: rgba(255, 85, 0, 0.1); }
 .track-row.playing .track-title { color: var(--accent); }
 .track-art { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; background: var(--bg-3); }
 .track-meta { overflow: hidden; }
@@ -253,3 +291,78 @@ button {
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* ---- Модалка с обложкой ---- */
+#art-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 8, 12, 0.6);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+#art-modal.open { opacity: 1; pointer-events: auto; }
+#art-modal .modal-card {
+  border-radius: 20px;
+  padding: 28px;
+  max-width: 560px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  transform: scale(0.94);
+  transition: transform 0.2s ease;
+}
+#art-modal.open .modal-card { transform: scale(1); }
+#modal-art {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 14px;
+  object-fit: cover;
+  background: var(--bg-3);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+#modal-title { font-size: 20px; font-weight: 700; margin-top: 18px; }
+#modal-artist { font-size: 15px; color: var(--accent); margin-top: 4px; }
+#modal-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+#modal-stats b { color: var(--text); font-weight: 600; }
+#modal-desc {
+  margin-top: 14px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-dim);
+  white-space: pre-wrap;
+  max-height: 140px;
+  overflow-y: auto;
+}
+#modal-close {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  font-size: 22px;
+  color: var(--text-dim);
+  padding: 6px;
+}
+#modal-close:hover { color: var(--text); }
+#art-modal .modal-card { position: relative; }
+
+/* обложки, по которым можно кликнуть */
+#player-artwork { cursor: zoom-in; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+#player-artwork:hover { transform: scale(1.05); box-shadow: 0 4px 18px rgba(255, 85, 0, 0.35); }
+.track-art { cursor: zoom-in; }
+
+/* лёгкое свечение акцентных кнопок */
+.btn.primary { box-shadow: 0 4px 20px rgba(255, 85, 0, 0.35); }
+.nav-btn.active { box-shadow: inset 0 0 0 1px rgba(255, 85, 0, 0.25); }
