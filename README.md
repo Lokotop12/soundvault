@@ -42,3 +42,11 @@ SC_RELAY_URL="https://your-worker.workers.dev" node server.js
 - `Пробел` — play/pause
 - `←` / `→` — перемотка 5 сек
 - `N` / `P` — следующий / предыдущий трек
+
+## Сборка Windows-инсталлера
+
+```bash
+# нужен wine (портативная сборка Kron4ek подходит) и libc6:i386
+PATH=/path/to/wine/bin:$PATH npx electron-builder --win nsis
+# результат: dist/SoundVault Setup <версия>.exe
+```
