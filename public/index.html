@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SoundVault</title>
+  <meta name="theme-color" content="#0f0f12">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icon-192.png">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <div id="login-screen" class="hidden">
+    <div class="login-card">
+      <h1>SoundVault</h1>
+      <p class="subtitle">Личный клиент SoundCloud</p>
+      <div class="login-instructions">
+        <p>Для входа нужен токен вашего аккаунта SoundCloud:</p>
+        <ol>
+          <li>Откройте <b>soundcloud.com</b> и войдите в аккаунт</li>
+          <li>Нажмите <b>F12</b> (инструменты разработчика)</li>
+          <li>Вкладка <b>Application</b> / <b>Хранилище</b> → <b>Cookies</b> → <b>https://soundcloud.com</b></li>
+          <li>Найдите cookie <b>oauth_token</b> и скопируйте его значение</li>
+          <li>Вставьте значение ниже</li>
+        </ol>
+      </div>
+      <input type="password" id="token-input" placeholder="oauth_token">
+      <div class="login-buttons">
+        <button id="login-btn" class="btn primary">Войти</button>
+        <button id="anon-btn" class="btn">Продолжить без аккаунта</button>
+      </div>
+      <p id="login-error" class="error hidden"></p>
+      <p class="note">Без аккаунта доступен только поиск.</p>
+    </div>
+  </div>
+
+  <div id="app" class="hidden">
+    <aside id="sidebar">
+      <div class="logo">SoundVault</div>
+      <div id="user-block" class="hidden">
+        <img id="user-avatar" src="" alt="">
+        <span id="user-name"></span>
+        <button id="logout-btn" title="Выйти">✕</button>
+      </div>
+      <nav>
+        <button class="nav-btn personal" data-view="feed">Лента</button>
+        <button class="nav-btn personal" data-view="likes">Лайки</button>
+        <button class="nav-btn personal" data-view="playlists">Плейлисты</button>
+        <button class="nav-btn active" data-view="search">Поиск</button>
+      </nav>
+      <div id="queue-panel">
+        <h3>Очередь</h3>
+        <div id="queue-list"></div>
+      </div>
+    </aside>
+
+    <main id="main">
+      <div id="search-bar">
+        <input type="text" id="search-input" placeholder="Поиск треков...">
+      </div>
+      <div id="content">
+        <div id="view-title"></div>
+        <div id="playlist-grid" class="hidden"></div>
+        <div id="track-list"></div>
+        <div id="loading" class="hidden">Загрузка...</div>
+        <div id="empty-state" class="hidden">Ничего не найдено</div>
+      </div>
+    </main>
+
+    <footer id="player">
+      <div id="player-track-info">
+        <img id="player-artwork" src="" alt="" class="hidden">
+        <div>
+          <div id="player-title">—</div>
+          <div id="player-artist"></div>
+        </div>
+      </div>
+      <div id="player-controls">
+        <div class="buttons">
+          <button id="prev-btn" title="Назад (P)">⏮</button>
+          <button id="play-btn" title="Играть/Пауза (Пробел)">▶</button>
+          <button id="next-btn" title="Вперёд (N)">⏭</button>
+        </div>
+        <div id="seek-row">
+          <span id="time-current">0:00</span>
+          <div id="waveform-wrap">
+            <canvas id="waveform"></canvas>
+            <div id="waveform-progress"></div>
+          </div>
+          <span id="time-total">0:00</span>
+        </div>
+      </div>
+      <div id="player-right">
+        <button id="like-btn" title="Лайк" class="personal">♡</button>
+        <input type="range" id="volume" min="0" max="1" step="0.01" value="1" title="Громкость">
+      </div>
+    </footer>
+  </div>
+
+  <audio id="audio"></audio>
+
+  <div id="art-modal">
+    <div class="modal-card">
+      <button id="modal-close" title="Закрыть">✕</button>
+      <img id="modal-art" src="" alt="">
+      <div id="modal-title"></div>
+      <div id="modal-artist"></div>
+      <div id="modal-stats"></div>
+      <div id="modal-desc"></div>
+    </div>
+  </div>
+
+  <script src="/vendor/hls.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
