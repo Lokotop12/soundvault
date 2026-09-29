@@ -7,13 +7,40 @@
     "start": "electron .",
     "serve": "node server.js"
   },
-  "keywords": ["soundcloud", "music", "client"],
+  "keywords": [
+    "soundcloud",
+    "music",
+    "client"
+  ],
   "author": "Lokotop12",
   "license": "ISC",
   "dependencies": {
     "undici": "^8.11.2"
   },
   "devDependencies": {
-    "electron": "^44.4.5"
+    "electron": "^44.4.5",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.lokotop12.soundvault",
+    "productName": "SoundVault",
+    "files": [
+      "electron/**",
+      "lib/**",
+      "public/**",
+      "worker/**",
+      "server.js",
+      "package.json"
+    ],
+    "win": {
+      "target": ["nsis"],
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
   }
 }
