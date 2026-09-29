@@ -1,18 +1,19 @@
 {
   "name": "soundvault",
   "version": "1.0.0",
-  "description": "Personal SoundCloud web client",
-  "main": "index.js",
-  "directories": {
-    "lib": "lib"
-  },
+  "description": "SoundVault — десктопный клиент SoundCloud, работающий без VPN",
+  "main": "electron/main.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "electron .",
+    "serve": "node server.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["soundcloud", "music", "client"],
+  "author": "Lokotop12",
   "license": "ISC",
   "dependencies": {
     "undici": "^8.11.2"
+  },
+  "devDependencies": {
+    "electron": "^44.4.5"
   }
 }
