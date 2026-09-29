@@ -210,7 +210,11 @@ function serveStatic(req, res, url) {
 }
 
 async function main() {
-  await detectUpstream();
+  try {
+    await detectUpstream();
+  } catch (e) {
+    console.error('[upstream] detection failed, continuing anyway:', e.message);
+  }
 
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
@@ -234,5 +238,4 @@ async function main() {
 
 main().catch((e) => {
   console.error('Fatal:', e);
-  process.exit(1);
 });

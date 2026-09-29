@@ -55,8 +55,14 @@ app.whenReady().then(async () => {
   // Если сервер уже запущен (например, через npm run serve) — просто подключаемся.
   const alreadyUp = await fetch(`${BASE}/api/status`).then(() => true).catch(() => false);
   if (!alreadyUp) {
-    // Сервер слушает порт сразу при require.
-    require(path.join(__dirname, '..', 'server.js'));
+    // В упакованном приложении каталог программы read-only (app.asar):
+    // конфиг кладём в пользовательскую папку (%APPDATA%/soundvault на Windows).
+    process.env.SV_CONFIG_DIR = app.getPath('userData');
+    try {
+      require(path.join(__dirname, '..', 'server.js'));
+    } catch (e) {
+      console.error('server require failed:', e);
+    }
     try {
       await waitForServer();
     } catch (e) {
