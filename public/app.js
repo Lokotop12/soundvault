@@ -132,11 +132,18 @@
 
     try {
       if (view === 'feed') {
-        const data = await api('/api/feed');
-        const tracks = (data.collection || [])
-          .map((item) => item.track || item.origin || (item.playlist ? null : item))
-          .filter((t) => t && t.title && t.duration);
-        renderTracks(tracks);
+        try {
+          const home = await api('/api/feed-home');
+          renderShelves(home.shelves || []);
+          $('#loading').classList.add('hidden');
+          return;
+        } catch {
+          const data = await api('/api/feed');
+          const tracks = (data.collection || [])
+            .map((item) => item.track || item.origin || (item.playlist ? null : item))
+            .filter((t) => t && t.title && t.duration);
+          renderTracks(tracks);
+        }
       } else if (view === 'likes') {
         const data = await api('/api/me/likes');
         const tracks = (data.collection || []).map((i) => i.track || i).filter((t) => t && t.title);
@@ -149,6 +156,10 @@
       } else if (view === 'playlist') {
         const data = await api(`/api/playlists/${arg}`);
         $('#view-title').textContent = data.title || 'Плейлист';
+        renderTracks((data.tracks || []).filter((t) => t && t.title));
+      } else if (view === 'sysplaylist') {
+        const data = await api(`/api/system-playlist?u=${encodeURIComponent(arg)}`);
+        $('#view-title').textContent = data.title || 'Подборка';
         renderTracks((data.tracks || []).filter((t) => t && t.title));
       } else if (view === 'search') {
         const q = $('#search-input').value.trim();
@@ -185,7 +196,79 @@
         <div class="pl-count">${pl.track_count || 0} треков</div>`;
       card.querySelector('.pl-title').textContent = pl.title || 'Без названия';
       card.addEventListener('click', () => loadView('playlist', pl.id));
+
+      if (!art) {
+        const img = card.querySelector('img');
+        api(`/api/playlists/${pl.id}`)
+          .then((d) => {
+            const last = [...(d.tracks || [])].reverse().find((t) => t && t.artwork_url);
+            if (last) img.src = `/media?u=${encodeURIComponent(last.artwork_url.replace('-large', '-t300x300'))}`;
+          })
+          .catch(() => {});
+      }
+
       grid.appendChild(card);
+    }
+  }
+
+  function renderShelves(shelves) {
+    const list = $('#track-list');
+    list.innerHTML = '';
+    $('#view-meta').textContent = '';
+    if (!shelves.length) {
+      $('#empty-state').classList.remove('hidden');
+      return;
+    }
+    $('#empty-state').classList.add('hidden');
+    for (const shelf of shelves) {
+      const section = document.createElement('section');
+      section.className = 'shelf';
+      const h = document.createElement('h3');
+      h.className = 'shelf-title';
+      h.textContent = shelf.title;
+      const scroll = document.createElement('div');
+      scroll.className = 'shelf-scroll';
+
+      const shelfTracks = shelf.items.filter((i) => i.type === 'track').map((i) => i.track);
+
+      shelf.items.forEach((item) => {
+        const card = document.createElement('div');
+        card.className = 'shelf-card';
+        let art = '';
+        let title = '';
+        let sub = '';
+        if (item.type === 'track') {
+          art = artworkUrl(item.track, 't300x300');
+          title = item.track.title;
+          sub = (item.track.user && item.track.user.username) || '';
+        } else {
+          art = item.artwork ? `/media?u=${encodeURIComponent(item.artwork)}` : '';
+          title = item.title;
+          sub = item.subtitle || '';
+        }
+        card.innerHTML = `
+          ${art ? `<img src="${art}" loading="lazy" alt="">` : '<img alt="">'}
+          <div class="sc-title"></div>
+          <div class="sc-sub"></div>`;
+        card.querySelector('.sc-title').textContent = title || '—';
+        card.querySelector('.sc-sub').textContent = sub;
+
+        card.addEventListener('click', () => {
+          if (item.type === 'track') {
+            const idx = shelfTracks.findIndex((t) => t.id === item.track.id);
+            if (idx >= 0) playQueue(shelfTracks, idx);
+          } else if (item.type === 'playlist') {
+            loadView('playlist', item.id);
+          } else if (item.type === 'sysplaylist') {
+            loadView('sysplaylist', item.urn);
+          }
+        });
+        scroll.appendChild(card);
+      });
+
+      section.appendChild(h);
+      section.appendChild(scroll);
+      list.appendChild(section);
     }
   }
 

@@ -113,6 +113,20 @@ async function routeApi(req, res, url) {
     catch (e) { return sendJson(res, e.status || 502, { error: e.message }); }
   }
 
+  if (p === '/api/feed-home' && method === 'GET') {
+    if (!requireAuth(res)) return;
+    try { return sendJson(res, 200, await api.homeShelves()); }
+    catch (e) { return sendJson(res, e.status || 502, { error: e.message }); }
+  }
+
+  if (p === '/api/system-playlist' && method === 'GET') {
+    if (!requireAuth(res)) return;
+    const urn = url.searchParams.get('u');
+    if (!urn) return sendJson(res, 400, { error: 'missing u param' });
+    try { return sendJson(res, 200, await api.systemPlaylist(urn)); }
+    catch (e) { return sendJson(res, e.status || 502, { error: e.message }); }
+  }
+
   if (p === '/api/feed' && method === 'GET') {
     if (!requireAuth(res)) return;
     try {
