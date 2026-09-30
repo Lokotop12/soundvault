@@ -502,6 +502,53 @@
 
   init();
 
+  (() => {
+    const cv = document.getElementById('dots-bg');
+    const ctx = cv.getContext('2d');
+    const GAP = 26;
+    const RADIUS = 150;
+    let dots = [];
+    let mx = -9999, my = -9999;
+
+    function build() {
+      const dpr = window.devicePixelRatio || 1;
+      cv.width = innerWidth * dpr;
+      cv.height = innerHeight * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      dots = [];
+      for (let x = GAP / 2; x < innerWidth; x += GAP)
+        for (let y = GAP / 2; y < innerHeight; y += GAP)
+          dots.push({ x, y, lift: 0 });
+    }
+
+    window.addEventListener('mousemove', (e) => { mx = e.clientX; my = e.clientY; });
+    window.addEventListener('mouseout', () => { mx = my = -9999; });
+    window.addEventListener('resize', build);
+
+    function tick() {
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      for (const d of dots) {
+        const dx = d.x - mx, dy = d.y - my;
+        const dist = Math.hypot(dx, dy);
+        const target = dist < RADIUS ? 1 - dist / RADIUS : 0;
+        d.lift += (target - d.lift) * 0.12;
+        const lift = d.lift;
+        const r = 1 + lift * 1.6;
+        if (lift > 0.02) {
+          ctx.fillStyle = `rgba(255, ${Math.round(120 + lift * 60)}, ${Math.round(40 * (1 - lift))}, ${0.15 + lift * 0.6})`;
+        } else {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.09)';
+        }
+        ctx.beginPath();
+        ctx.arc(d.x + dx / (dist || 1) * lift * 10, d.y - lift * 22, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      requestAnimationFrame(tick);
+    }
+    build();
+    tick();
+  })();
+
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   }
