@@ -168,14 +168,24 @@ async function routeApi(req, res, url) {
     }
   }
 
+  if (p === '/api/local-likes' && method === 'GET') {
+    return sendJson(res, 200, { ids: readConfig().localLikes || [] });
+  }
+
   const mLike = p.match(/^\/api\/likes\/(\d+)$/);
   if (mLike && (method === 'POST' || method === 'DELETE')) {
     if (!requireAuth(res)) return;
     try {
       const r = method === 'POST' ? await api.like(mLike[1]) : await api.unlike(mLike[1]);
-      return sendJson(res, r.ok ? 200 : r.status, { ok: r.ok, status: r.status });
-    } catch (e) {
-      return sendJson(res, e.status || 502, { error: e.message });
+      if (r.ok) return sendJson(res, 200, { ok: true });
+      throw new Error(`remote ${r.status}`);
+    } catch {
+      const cfg = readConfig();
+      const set = new Set(cfg.localLikes || []);
+      const id = Number(mLike[1]);
+      if (method === 'POST') set.add(id); else set.delete(id);
+      writeConfig({ localLikes: [...set] });
+      return sendJson(res, 200, { ok: true, local: true });
     }
   }
 

@@ -523,3 +523,30 @@ body::after { display: none; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.track-like, #like-btn { position: relative; transition: transform 0.15s ease, color 0.2s ease; }
+.track-like:active, #like-btn:active { transform: scale(0.85); }
+.track-like.liked, #like-btn.liked {
+  color: #ff3d71;
+  text-shadow: 0 0 14px rgba(255, 61, 113, 0.7);
+  animation: heart-pop 0.4s cubic-bezier(0.2, 2.4, 0.4, 1);
+}
+@keyframes heart-pop {
+  0% { transform: scale(0.3); }
+  55% { transform: scale(1.45); }
+  75% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+.heart-particle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  font-size: 12px;
+  color: #ff3d71;
+  pointer-events: none;
+  animation: heart-fly 0.85s cubic-bezier(0.2, 0.6, 0.4, 1) forwards;
+}
+@keyframes heart-fly {
+  0% { transform: translate(-50%, -50%) scale(0.4) rotate(0deg); opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.2) rotate(var(--rt)); opacity: 0; }
+}

@@ -110,6 +110,10 @@
         if (t && t.id) state.likedIds.add(t.id);
       }
     } catch {}
+    try {
+      const local = await api('/api/local-likes');
+      for (const id of local.ids || []) state.likedIds.add(id);
+    } catch {}
   }
 
   $$('.nav-btn').forEach((btn) => {
@@ -191,7 +195,7 @@
         ? `/media?u=${encodeURIComponent(pl.artwork_url.replace('-large', '-t300x300'))}`
         : '';
       card.innerHTML = `
-        ${art ? `<img src="${art}" loading="lazy">` : '<img alt="">'}
+        ${art ? `<img src="${art}">` : '<img alt="">'}
         <div class="pl-title"></div>
         <div class="pl-count">${pl.track_count || 0} треков</div>`;
       card.querySelector('.pl-title').textContent = pl.title || 'Без названия';
@@ -201,8 +205,8 @@
         const img = card.querySelector('img');
         api(`/api/playlists/${pl.id}`)
           .then((d) => {
-            const last = [...(d.tracks || [])].reverse().find((t) => t && t.artwork_url);
-            if (last) img.src = `/media?u=${encodeURIComponent(last.artwork_url.replace('-large', '-t300x300'))}`;
+            const first = (d.tracks || []).find((t) => t && t.artwork_url);
+            if (first) img.src = `/media?u=${encodeURIComponent(first.artwork_url.replace('-large', '-t300x300'))}`;
           })
           .catch(() => {});
       }
@@ -247,7 +251,7 @@
           sub = item.subtitle || '';
         }
         card.innerHTML = `
-          ${art ? `<img src="${art}" loading="lazy" alt="">` : '<img alt="">'}
+          ${art ? `<img src="${art}" alt="">` : '<img alt="">'}
           <div class="sc-title"></div>
           <div class="sc-sub"></div>`;
         card.querySelector('.sc-title').textContent = title || '—';
@@ -287,7 +291,7 @@
       row.className = 'track-row' + (state.currentTrack && state.currentTrack.id === track.id ? ' playing' : '');
       row.dataset.trackId = track.id;
       row.innerHTML = `
-        <img class="track-art" src="${artworkUrl(track)}" loading="lazy" alt="">
+        <img class="track-art" src="${artworkUrl(track)}" alt="">
         <div class="track-meta">
           <div class="track-title"></div>
           <div class="track-artist"></div>
@@ -326,16 +330,34 @@
   async function toggleLike(track, btn) {
     const liked = state.likedIds.has(track.id);
     try {
-      await api(`/api/likes/${track.id}`, { method: liked ? 'DELETE' : 'POST' });
+      const r = await api(`/api/likes/${track.id}`, { method: liked ? 'DELETE' : 'POST' });
       if (liked) state.likedIds.delete(track.id);
       else state.likedIds.add(track.id);
       btn.classList.toggle('liked', !liked);
       btn.textContent = !liked ? '♥' : '♡';
-      toast(liked ? 'Убрано из лайков' : 'Добавлено в лайки');
+      if (!liked) burstHearts(btn);
+      if (r && r.local) {
+        toast('SC ограничил лайки в сторонних клиентах — сохранил локально');
+      } else {
+        toast(liked ? 'Убрано из лайков' : 'Добавлено в лайки');
+      }
       if (state.currentTrack && state.currentTrack.id === track.id) updatePlayerLike();
     } catch (e) {
       console.error('like failed', e);
       toast('Не удалось поставить лайк');
+    }
+  }
+
+  function burstHearts(btn) {
+    for (let i = 0; i < 6; i++) {
+      const p = document.createElement('span');
+      p.className = 'heart-particle';
+      p.textContent = '♥';
+      p.style.setProperty('--dx', `${(Math.random() - 0.5) * 70}px`);
+      p.style.setProperty('--dy', `${-30 - Math.random() * 50}px`);
+      p.style.setProperty('--rt', `${(Math.random() - 0.5) * 90}deg`);
+      btn.appendChild(p);
+      setTimeout(() => p.remove(), 900);
     }
   }
 
