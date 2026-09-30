@@ -192,6 +192,7 @@
   function renderTracks(tracks) {
     const list = $('#track-list');
     list.innerHTML = '';
+    $('#view-meta').textContent = tracks.length ? `${tracks.length} трек(ов)` : '';
     if (!tracks.length) {
       $('#empty-state').classList.remove('hidden');
       return;
@@ -201,12 +202,14 @@
     tracks.forEach((track, idx) => {
       const row = document.createElement('div');
       row.className = 'track-row' + (state.currentTrack && state.currentTrack.id === track.id ? ' playing' : '');
+      row.dataset.trackId = track.id;
       row.innerHTML = `
         <img class="track-art" src="${artworkUrl(track)}" loading="lazy" alt="">
         <div class="track-meta">
           <div class="track-title"></div>
           <div class="track-artist"></div>
         </div>
+        <span class="eq"><i></i><i></i><i></i></span>
         <div class="track-duration">${fmtTime(track.duration || 0, true)}</div>
         <button class="track-like ${state.likedIds.has(track.id) ? 'liked' : ''}" title="Лайк">
           ${state.likedIds.has(track.id) ? '♥' : '♡'}
@@ -228,6 +231,15 @@
     });
   }
 
+  let toastTimer = null;
+  function toast(msg) {
+    const el = $('#toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+  }
+
   async function toggleLike(track, btn) {
     const liked = state.likedIds.has(track.id);
     try {
@@ -236,9 +248,11 @@
       else state.likedIds.add(track.id);
       btn.classList.toggle('liked', !liked);
       btn.textContent = !liked ? '♥' : '♡';
+      toast(liked ? 'Убрано из лайков' : 'Добавлено в лайки');
       if (state.currentTrack && state.currentTrack.id === track.id) updatePlayerLike();
     } catch (e) {
       console.error('like failed', e);
+      toast('Не удалось поставить лайк');
     }
   }
 
@@ -288,10 +302,16 @@
     if (art) {
       $('#player-artwork').src = art;
       $('#player-artwork').classList.remove('hidden');
+      $('#player').style.setProperty('--player-art', `url("${art}")`);
+      $('#player').classList.add('has-art');
+    } else {
+      $('#player').classList.remove('has-art');
     }
     $('#time-total').textContent = fmtTime(track.duration || 0, true);
     updatePlayerLike();
-    $$('.track-row').forEach((r) => r.classList.remove('playing'));
+    $$('.track-row').forEach((r) => {
+      r.classList.toggle('playing', state.currentTrack && r.dataset.trackId === String(track.id));
+    });
     drawWaveform();
 
     if (track.waveform_url) {
@@ -382,8 +402,8 @@
     localStorage.setItem('sv_volume', e.target.value);
   });
 
-  audio.addEventListener('play', () => { $('#play-btn').textContent = '⏸'; });
-  audio.addEventListener('pause', () => { $('#play-btn').textContent = '▶'; });
+  audio.addEventListener('play', () => { $('#play-btn').textContent = '⏸'; document.body.classList.remove('paused'); });
+  audio.addEventListener('pause', () => { $('#play-btn').textContent = '▶'; document.body.classList.add('paused'); });
   audio.addEventListener('ended', next);
   audio.addEventListener('timeupdate', () => {
     $('#time-current').textContent = fmtTime(audio.currentTime);

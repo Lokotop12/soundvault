@@ -1,4 +1,4 @@
-const CACHE = 'soundvault-v3';
+const CACHE = 'soundvault-v4';
 const STATIC = ['/', '/index.html', '/style.css', '/app.js', '/vendor/hls.js', '/manifest.webmanifest'];
 
 self.addEventListener('install', (e) => {
