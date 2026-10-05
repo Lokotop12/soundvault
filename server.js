@@ -103,8 +103,19 @@ async function routeApi(req, res, url) {
 
   if (p === '/api/me/likes' && method === 'GET') {
     if (!requireAuth(res)) return;
-    try { return sendJson(res, 200, await api.likes(100)); }
-    catch (e) { return sendJson(res, e.status || 502, { error: e.message }); }
+    let data;
+    try { data = await api.likes(100); }
+    catch { data = { collection: [] }; }
+    const localIds = (readConfig().localLikes || []).filter(
+      (id) => !(data.collection || []).some((i) => (i.track || i).id === id)
+    );
+    if (localIds.length) {
+      try {
+        const tracks = await api.hydrateTracks(localIds.map((id) => ({ id })));
+        for (const t of tracks.reverse()) if (t && t.title) data.collection.unshift({ track: t });
+      } catch {}
+    }
+    return sendJson(res, 200, data);
   }
 
   if (p === '/api/me/playlists' && method === 'GET') {
