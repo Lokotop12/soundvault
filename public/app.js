@@ -225,6 +225,7 @@
     }
     $('#empty-state').classList.add('hidden');
     for (const shelf of shelves) {
+      if (/recently played/i.test(shelf.title || '')) continue;
       const section = document.createElement('section');
       section.className = 'shelf';
       const h = document.createElement('h3');
@@ -514,6 +515,7 @@
     $('#time-current').textContent = fmtTime(audio.currentTime);
     const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
     $('#waveform-progress').style.width = pct + '%';
+    $('#pacman').style.left = pct + '%';
   });
 
   $('#waveform-wrap').addEventListener('click', (e) => {

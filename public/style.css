@@ -249,7 +249,7 @@ button {
 .track-title { font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .track-artist { font-size: 13px; color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .track-duration { font-size: 13px; color: var(--text-dim); text-align: right; }
-.track-like { font-size: 18px; color: var(--text-dim); padding: 6px; }
+.track-like { font-size: 24px; color: var(--text-dim); padding: 6px; }
 .track-like:hover { color: var(--accent); }
 .track-like.liked { color: var(--accent); }
 
@@ -292,8 +292,27 @@ button {
   pointer-events: none;
 }
 
+#pacman {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 18px;
+  height: 18px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: conic-gradient(transparent 60deg, #ffd23e 60deg 300deg, transparent 300deg);
+  animation: pacman-chomp 0.45s linear infinite alternate;
+  pointer-events: none;
+  filter: drop-shadow(0 0 4px rgba(255, 210, 62, 0.7));
+}
+body.paused #pacman { animation-play-state: paused; }
+@keyframes pacman-chomp {
+  from { background: conic-gradient(transparent 55deg, #ffd23e 55deg 305deg, transparent 305deg); }
+  to { background: conic-gradient(transparent 84deg, #ffd23e 84deg 276deg, transparent 276deg); }
+}
+
 #player-right { display: flex; align-items: center; gap: 14px; justify-content: flex-end; }
-#like-btn { font-size: 22px; color: var(--text-dim); }
+#like-btn { font-size: 30px; color: var(--text-dim); }
 #like-btn:hover, #like-btn.liked { color: var(--accent); }
 #volume { width: 90px; accent-color: var(--accent); }
 
