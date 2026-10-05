@@ -24,8 +24,16 @@
   function artworkUrl(track, size = 'large') {
     const raw = track.artwork_url || (track.user && track.user.avatar_url) || '';
     if (!raw) return '';
-    return `/media?u=${encodeURIComponent(raw.replace('-large', `-${size}`))}`;
+    return raw.replace('-large', `-${size}`);
   }
+
+  document.addEventListener('error', (e) => {
+    const t = e.target;
+    if (t.tagName === 'IMG' && !t.dataset.proxied && /^https?:/.test(t.src)) {
+      t.dataset.proxied = '1';
+      t.src = `/media?u=${encodeURIComponent(t.src)}`;
+    }
+  }, true);
 
   async function api(path, opts) {
     const res = await fetch(path, opts);
@@ -191,9 +199,7 @@
     for (const pl of playlists) {
       const card = document.createElement('div');
       card.className = 'playlist-card';
-      const art = pl.artwork_url
-        ? `/media?u=${encodeURIComponent(pl.artwork_url.replace('-large', '-t300x300'))}`
-        : '';
+      const art = pl.artwork_url ? pl.artwork_url.replace('-large', '-t300x300') : '';
       card.innerHTML = `
         ${art ? `<img src="${art}">` : '<img alt="">'}
         <div class="pl-title"></div>
@@ -206,7 +212,7 @@
         api(`/api/playlists/${pl.id}`)
           .then((d) => {
             const first = (d.tracks || []).find((t) => t && t.artwork_url);
-            if (first) img.src = `/media?u=${encodeURIComponent(first.artwork_url.replace('-large', '-t300x300'))}`;
+            if (first) img.src = first.artwork_url.replace('-large', '-t300x300');
           })
           .catch(() => {});
       }
@@ -247,7 +253,7 @@
           title = item.track.title;
           sub = (item.track.user && item.track.user.username) || '';
         } else {
-          art = item.artwork ? `/media?u=${encodeURIComponent(item.artwork)}` : '';
+          art = item.artwork || '';
           title = item.title;
           sub = item.subtitle || '';
         }
