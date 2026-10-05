@@ -300,15 +300,25 @@ button {
   height: 18px;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: conic-gradient(transparent 60deg, #ffd23e 60deg 300deg, transparent 300deg);
+  background: conic-gradient(#ffd23e 0deg 60deg, transparent 60deg 120deg, #ffd23e 120deg 360deg);
   animation: pacman-chomp 0.45s linear infinite alternate;
   pointer-events: none;
   filter: drop-shadow(0 0 4px rgba(255, 210, 62, 0.7));
 }
+#pacman::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  width: 3.5px;
+  height: 3.5px;
+  border-radius: 50%;
+  background: #1a1a1a;
+}
 body.paused #pacman { animation-play-state: paused; }
 @keyframes pacman-chomp {
-  from { background: conic-gradient(transparent 55deg, #ffd23e 55deg 305deg, transparent 305deg); }
-  to { background: conic-gradient(transparent 84deg, #ffd23e 84deg 276deg, transparent 276deg); }
+  from { background: conic-gradient(#ffd23e 0deg 55deg, transparent 55deg 125deg, #ffd23e 125deg 360deg); }
+  to { background: conic-gradient(#ffd23e 0deg 84deg, transparent 84deg 96deg, #ffd23e 96deg 360deg); }
 }
 
 #player-right { display: flex; align-items: center; gap: 14px; justify-content: flex-end; }
@@ -506,6 +516,8 @@ body::after { display: none; }
 .shelf-card {
   flex: 0 0 160px;
   cursor: pointer;
+  will-change: transform;
+  isolation: isolate;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.07);
   backdrop-filter: blur(14px) saturate(1.3);
@@ -525,6 +537,7 @@ body::after { display: none; }
   border-radius: 10px;
   object-fit: cover;
   background: rgba(255, 255, 255, 0.06);
+  transform: translateZ(0);
 }
 .shelf-card .sc-title {
   font-size: 13px;
