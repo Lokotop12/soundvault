@@ -1,6 +1,6 @@
 {
   "name": "soundvault",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "SoundVault — десктопный клиент SoundCloud, работающий без VPN",
   "main": "electron/main.js",
   "scripts": {
